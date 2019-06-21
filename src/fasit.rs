@@ -16,13 +16,13 @@ fn get_env_class(env: &str) -> &str {
     };
 }
 
-pub(crate) fn create_resource<'a>(
-    username: &'a str,
-    password: &'a str,
-    resource_name: &'a str,
-    url: &'a str,
-    env: &'a str,
-    zone: &'a str) -> &'a str {
+pub(crate) fn create_resource<>(
+    username: &str,
+    password: &str,
+    resource_name: &str,
+    url: &str,
+    env: &str,
+    zone: &str) -> String {
     let request = json!({
         "type": "RestService",
           "alias": resource_name,
@@ -40,19 +40,19 @@ pub(crate) fn create_resource<'a>(
     println!("Posting: {}", serde_json::to_string(&request).unwrap());
     println!("To: {}", fasit_url());
 
-    match Client::new()
+    if let Ok(response) = Client::new()
         .post(&format!("{}/api/v2/resources", fasit_url()))
         .header("Content-Type", "application/json")
         .json(&request)
         .basic_auth(username, Some(password.to_owned()))
         .send() {
-        Ok(response) => {
-            match response.headers().get(LOCATION).unwrap().to_str() {
-                Ok(location) => location.split("/").last().unwrap(),
-                Err(e) => "",
-            }
-        },
-        Err(e) => return "",
+        if let Some(location) = response.headers().get(LOCATION) {
+            location.to_str().unwrap().split("/").last().unwrap().to_owned()
+        } else {
+            "".to_owned()
+        }
+    } else {
+        "".to_owned()
     }
 }
 
