@@ -1,0 +1,60 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: restgw-iac
+  namespace: default
+  labels:
+    team: {{team}}
+spec:
+  template:
+    spec:
+      containers:
+      - name: restgw-iac
+        image: docker.pkg.github.com/navikt/restgw-iac/{{version}}
+        command: []
+        resources:
+          requests:
+            memory: 8Mi
+            cpu: 5m
+          limits:
+            memory: 8Mi
+            cpu: 5m
+        env:
+          - name: VAULT_PATH
+            env: /var/run/secrets/nais.io/vault
+      restartPolicy: never
+  backoffLimit: 4
+  initContainers:
+    - env:
+        - name: VKS_VAULT_ADDR
+          value: https://vault.adeo.no
+        - name: VKS_AUTH_PATH
+          value: /kubernetes/preprod/fss
+        - name: VKS_KV_PATH
+          value: /kv/preprod/fss/syfosoknadjob/syfocron
+        - name: VKS_VAULT_ROLE
+          value: syfosoknadjob
+        - name: VKS_SECRET_DEST_PATH
+          value: /var/run/secrets/nais.io/vault
+      image: navikt/vks:29
+      resources:
+        requests:
+          memory: "64Mi"
+          cpu: "100m"
+        limits:
+          memory: "128Mi"
+          cpu: "100m"
+      name: vks
+      volumeMounts:
+        - mountPath: /var/run/secrets/nais.io/vault
+          name: vault-secrets
+      serviceAccount: podcreator
+      serviceAccountName: podcreator
+      volumes:
+        - configMap:
+            defaultMode: 420
+            name: ca-bundle
+          name: ca-bundle
+        - emptyDir:
+            medium: Memory
+          name: vault-secrets

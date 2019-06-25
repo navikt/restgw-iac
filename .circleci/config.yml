@@ -1,0 +1,72 @@
+version: 2.1
+jobs:
+  linux_build:
+    docker:
+      - image: "circleci/rust:1.33.0"
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Generate version number and docker image tags
+          command: |
+            mkdir /tmp/workspace
+            export RELEASE_VERSION=$CIRCLE_SHA1-$CIRCLE_BUILD_NUM
+            echo "export RELEASE_VERSION=$RELEASE_VERSION" >> /tmp/workspace/properties.env
+            echo "export DOCKER_TAG=\"$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/$CIRCLE_PROJECT_REPONAME:$RELEASE_VERSION\"" >> /tmp/workspace/properties.env
+            cat /tmp/workspace/properties.env >> $BASH_ENV
+      - run:
+          name: Install required dependencies
+          command: |
+            sudo apt update
+            sudo apt install -y musl musl-tools
+      - run:
+          name: Install build target
+          command: rustup target add x86_64-unknown-linux-musl
+      - run:
+          name: Run tests
+          command: cargo test --release --target x86_64-unknown-linux-musl
+      - run:
+          name: Build executable
+          command: cargo build --release --target x86_64-unknown-linux-musl\
+      - store_artifacts:
+          path: target/x86_64-unknown-linux-musl/release/deployment-cli
+      - run:
+          name: Build docker image
+          command: docker build -t docker.pkg.github.com/$DOCKER_TAG .
+      - run:
+          name: Docker push
+          command: |
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin docker.pkg.github.com
+            echo "Pushing with tag $DOCKER_TAG"
+            docker push docker.pkg.github.com/$DOCKER_TAG
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - properties.env
+  deploy:
+    docker:
+      - image: "navikt/deployment-cli:44bb04ecc11c0e57ac539744411c70794dd31899"
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - checkout
+      - run:
+          name: Set up environment variables
+          command: cat /tmp/workspace/properties.env >> $BASH_ENV
+      - run:
+          name: Create github deployment for dev-sbs
+          command: source $BASH_ENV; deployment-cli deploy create --cluster=dev-fss --team=teamsykefravr -r=job.yaml --version=${DOCKER_TAG} --repository=$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+workflows:
+  version: 2
+  build_and_release:
+    jobs:
+      - linux_build:
+          filters:
+            tags:
+              only: master
+      - deploy:
+          requires:
+            - linux_build
+          filters:
+            branches:
+              only: master

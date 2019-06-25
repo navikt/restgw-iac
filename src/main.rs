@@ -52,7 +52,8 @@ impl Zone {
 fn fasit_user() -> FasitUser { FasitUser { username: "usr".to_owned(), password: "pass".to_owned() } }
 
 fn main() {
-    let fasit_user: FasitUser = serde_json::from_reader(File::open("credentials.json").expect("Unable to open secrets file"))
+    let credentials_path = format!("{}/credentials.json", env::var("VAULT_PATH").unwrap_or(".".to_owned()));
+    let fasit_user: FasitUser = serde_json::from_reader(File::open(&credentials_path).expect("Unable to open secrets file"))
         .expect("Unable to parse secrets as json");
     let configuration: Vec<ApplicationConsumerPair> = serde_json::from_reader(File::open("configuration.json").expect("Unable to open configuration file"))
         .expect("Unable to parse configuration as json");
