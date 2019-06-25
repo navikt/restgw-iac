@@ -27,7 +27,7 @@ jobs:
           command: cargo test --release --target x86_64-unknown-linux-musl
       - run:
           name: Build executable
-          command: cargo build --release --target x86_64-unknown-linux-musl\
+          command: cargo build --release --target x86_64-unknown-linux-musl
       - store_artifacts:
           path: target/x86_64-unknown-linux-musl/release/deployment-cli
       - run:
