@@ -7,17 +7,34 @@ use serde_json;
 
 use crate::FasitUser;
 
+#[derive(Deserialize, Clone, Debug)]
+pub struct FasitResource {
+    pub id: u64,
+    pub alias: String,
+}
+
 #[cfg(not(test))]
 fn fasit_url() -> &'static str {
     "http://localhost:3000"
 }
 
 fn get_env_class(env: &str) -> &str {
-    return if env.contains("p") {
-        "p"
-    } else {
-        "q"
-    };
+    match env {
+        p => "p",
+        _ => "q",
+    }
+}
+
+pub fn get_resource_by_name(resource_name: &String, env: &str) -> reqwest::Result<Option<u64>> {
+    Ok(Client::new()
+        .get(&format!("{}/api/v2/resources", fasit_url()))
+        .query(&[("alias", resource_name), ("environment", &env.to_owned())])
+        .send()?
+        .json::<Vec<FasitResource>>()?
+        .into_iter()
+        .find(|resource| &resource.alias == resource_name)
+        .map(|resource| resource.id)
+    )
 }
 
 pub fn create_resource(
@@ -70,16 +87,11 @@ pub fn create_application(fasit_user: &FasitUser, application: &str) -> reqwest:
         .to_str().unwrap().split("/").last().unwrap().to_owned().parse::<u64>().unwrap())
 }
 
-#[derive(Deserialize, Clone, Copy, Debug)]
-pub struct FasitResource {
-    pub id: u64,
-}
-
-pub fn get_application_by_name(application: &str) -> reqwest::Result<Option<FasitResource>> {
+pub fn get_application_by_name(application: &str) -> reqwest::Result<Option<u64>> {
     Client::new()
         .get(&format!("{}/api/v2/applications/{}", fasit_url(), application))
         .send()
-        .map(|mut response| Ok(Some(response.json::<FasitResource>().unwrap())))
+        .map(|mut response| Ok(Some(response.json::<FasitResource>().unwrap().id)))
         .unwrap_or_else(|err| match err.status().map(|status| status.as_u16()) {
             Some(404) => Ok(None),
             _ => Err(err),
