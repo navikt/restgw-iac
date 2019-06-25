@@ -18,6 +18,11 @@ fn fasit_url() -> &'static str {
     "http://localhost:3000"
 }
 
+#[cfg(test)]
+fn fasit_url() -> &'static str {
+    "todo"
+}
+
 fn get_env_class(env: &str) -> &str {
     match env {
         p => "p",
