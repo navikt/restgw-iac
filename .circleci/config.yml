@@ -36,7 +36,7 @@ jobs:
       - run:
           name: Docker push
           command: |
-            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin docker.pkg.github.com
+            echo "$DEPLOYMENT_PASSWORD" | docker login -u "$DEPLOYMENT_USER" --password-stdin docker.pkg.github.com
             echo "Pushing with tag $DOCKER_TAG"
             docker push docker.pkg.github.com/$DOCKER_TAG
       - persist_to_workspace:
