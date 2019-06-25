@@ -22,7 +22,7 @@ spec:
         env:
           - name: VAULT_PATH
             env: /var/run/secrets/nais.io/vault
-      restartPolicy: never
+      restartPolicy: Never
   backoffLimit: 4
   initContainers:
     - env:
