@@ -11,7 +11,7 @@ spec:
       containers:
       - name: restgw-iac
         image: docker.pkg.github.com/navikt/restgw-iac/{{version}}
-        command: []
+        command: ["restgw-iac"]
         resources:
           requests:
             memory: 8Mi

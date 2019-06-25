@@ -29,7 +29,7 @@ jobs:
           name: Build executable
           command: cargo build --release --target x86_64-unknown-linux-musl
       - store_artifacts:
-          path: target/x86_64-unknown-linux-musl/release/deployment-cli
+          path: target/x86_64-unknown-linux-musl/release/restgw-iac
       - run:
           name: Build docker image
           command: docker build -t docker.pkg.github.com/$DOCKER_TAG .
