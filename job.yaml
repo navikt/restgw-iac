@@ -48,8 +48,8 @@ spec:
             value: restgw-iac
           - name: VKS_SECRET_DEST_PATH
             value: /var/run/secrets/nais.io/vault
-      serviceAccount: podcreator
-      serviceAccountName: podcreator
+      serviceAccount: restgw-iac
+      serviceAccountName: restgw-iac
       volumes:
         - configMap:
           defaultMode: 420
