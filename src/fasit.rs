@@ -13,6 +13,11 @@ pub struct FasitResource {
     pub alias: String,
 }
 
+#[derive(Deserialize, Copy, Clone, Debug)]
+pub struct FasitApplication {
+    pub id: u64,
+}
+
 #[cfg(not(test))]
 fn fasit_url() -> &'static str {
     "https://fasit.adeo.no"
@@ -96,7 +101,7 @@ pub fn get_application_by_name(application: &str) -> reqwest::Result<Option<u64>
     Client::new()
         .get(&format!("{}/api/v2/applications/{}", fasit_url(), application))
         .send()
-        .map(|mut response| Ok(Some(response.json::<FasitResource>().unwrap().id)))
+        .map(|mut response| Ok(Some(response.json::<FasitApplication>().unwrap().id)))
         .unwrap_or_else(|err| match err.status().map(|status| status.as_u16()) {
             Some(404) => Ok(None),
             _ => Err(err),
