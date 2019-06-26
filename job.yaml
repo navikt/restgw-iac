@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
       - name: restgw-iac
-        image: docker.pkg.github.com/navikt/restgw-iac/{{version}}
+        image: docker.pkg.github.com/{{version}}
         command: ["restgw-iac"]
         resources:
           requests:
