@@ -15,7 +15,7 @@ pub struct FasitResource {
 
 #[cfg(not(test))]
 fn fasit_url() -> &'static str {
-    "http://localhost:3000"
+    "https://fasit.adeo.no"
 }
 
 #[cfg(test)]
@@ -25,7 +25,7 @@ fn fasit_url() -> &'static str {
 
 fn get_env_class(env: &str) -> &str {
     match env {
-        p => "p",
+        "p" => "p",
         _ => "q",
     }
 }
