@@ -1,3 +1,5 @@
+#[macro_use]
+extern crate log;
 extern crate reqwest;
 extern crate serde;
 #[macro_use]
@@ -53,35 +55,69 @@ impl Zone {
 fn fasit_user() -> FasitUser { FasitUser { username: "usr".to_owned(), password: "pass".to_owned() } }
 
 fn main() {
-    let credentials_path: PathBuf = [env::var("VAULT_PATH").unwrap_or(".".to_owned()), "credentials.json".to_owned()].iter().collect();
-    println!("Secrets path: {:?}", &credentials_path);
-    let fasit_user: FasitUser = serde_json::from_reader(File::open(&credentials_path).expect("Unable to open secrets file"))
-        .expect("Unable to parse secrets as json");
-    let configuration: Vec<ApplicationConsumerPair> = serde_json::from_reader(File::open("configuration.json").expect("Unable to open configuration file"))
-        .expect("Unable to parse configuration as json");
+    let credentials_path: PathBuf = [env::var("VAULT_PATH")
+        .unwrap_or(".".to_owned()), "credentials.json".to_owned()].iter().collect();
+    info!("Secrets path: {:?}", &credentials_path);
+
+    let fasit_user: FasitUser = serde_json::from_reader(
+        File::open(&credentials_path).expect("Unable to open secrets file")
+    ).expect("Unable to parse secrets as json");
+
+    let configuration: Vec<ApplicationConsumerPair> = serde_json::from_reader(
+        File::open("configuration.json").expect("Unable to open configuration file")
+    ).expect("Unable to parse configuration as json");
 
     (&configuration).into_iter()
-        .flat_map(| pair | vec![("p", pair), ("q1", pair)])
-        .for_each(| (env, pair) | {
-            set_up_and_connect_consumer_and_producer(&fasit_user, &pair.application_name, &pair.consumer_name, env)
+        .flat_map(|pair| vec![("p", pair), ("q1", pair)])
+        .for_each(|(env, pair)| {
+            connect_consumer_and_producer(
+                &fasit_user,
+                &pair.application_name,
+                &pair.consumer_name,
+                env,
+            )
         });
-    println!("{:?}", &configuration);
+
+    info!("{:?}", &configuration);
 }
 
-fn set_up_and_connect_consumer_and_producer(fasit_user: &FasitUser, application_name: &String, consumer_name: &String, env: &str) {
-    let application_resource_name = set_up_applicationinstance(fasit_user, application_name, &Zone::FSS, env);
+fn connect_consumer_and_producer(
+    fasit_user: &FasitUser,
+    application_name: &String,
+    consumer_name: &String,
+    env: &str) {
+    let application_resource_name =
+        set_up_applicationinstance(fasit_user, application_name, &Zone::FSS, env);
+
     set_up_applicationinstance(fasit_user, consumer_name, &Zone::SBS, env);
 
-    // Api management shit
-    api_management::register_exposed_application(fasit_user, application_name, env)
-        .expect("Failed to register exposed application");
-    api_management::register_application_consumer(fasit_user, application_name, &application_resource_name, consumer_name)
-        .expect("Failed to register application consumer");
-    api_management::register_application_consumer_connection(fasit_user, application_name, env)
-        .expect("Failed to register application consumer connection");
+    api_management::register_exposed_application(
+        fasit_user,
+        application_name,
+        env,
+    ).expect("Failed to register exposed application");
+
+    api_management::register_application_consumer(
+        fasit_user,
+        application_name,
+        &application_resource_name,
+        consumer_name,
+    ).expect("Failed to register application consumer");
+
+    api_management::register_application_consumer_connection(
+        fasit_user,
+        application_name,
+        env,
+    ).expect("Failed to register application consumer connection");
+
+    info!("Application: {} and consumer: {} connected in {}", application_name, consumer_name, env)
 }
 
-fn set_up_applicationinstance(fasit_user: &FasitUser, application_name: &String, zone: &Zone, env: &str) -> String {
+fn set_up_applicationinstance(
+    fasit_user: &FasitUser,
+    application_name: &String,
+    zone: &Zone,
+    env: &str) -> String {
     let resource_name = format!("{}Api", application_name);
     let url = zone.application_url_for(application_name, env);
 
@@ -90,10 +126,15 @@ fn set_up_applicationinstance(fasit_user: &FasitUser, application_name: &String,
 
     fasit::create_application_instance(fasit_user, application_name, env, &resource_id)
         .expect("Failed to create application instance");
+
     resource_name
 }
 
-fn get_or_create_resource(fasit_user: &FasitUser, resource_name: &String, url: &String, env: &str) -> u64 {
+fn get_or_create_resource(
+    fasit_user: &FasitUser,
+    resource_name: &String,
+    url: &String,
+    env: &str) -> u64 {
     fasit::get_resource_by_name(resource_name, env)
         .expect("Failed to get resource from fasit")
         .unwrap_or_else(|| fasit::create_resource(fasit_user, resource_name, url, env)
