@@ -1,5 +1,7 @@
 use std::convert;
 
+#[macro_use]
+use log;
 use reqwest::{Client, Error, StatusCode};
 use reqwest::header::LOCATION;
 use reqwest::Response;
@@ -36,6 +38,8 @@ fn get_env_class(env: &str) -> &str {
 }
 
 pub fn get_resource_by_name(resource_name: &String, env: &str) -> reqwest::Result<Option<u64>> {
+    debug!("Atempting to get resource with name: {}, in {}", resource_name, env);
+
     Ok(Client::new()
         .get(&format!("{}/api/v2/resources", fasit_url()))
         .query(&[("alias", resource_name), ("environment", &env.to_owned())])
@@ -52,6 +56,8 @@ pub fn create_resource(
     resource_name: &String,
     url: &String,
     env: &str) -> reqwest::Result<u64> {
+    debug!("Creating resource: {} in {}", resource_name, env);
+
     let request = json!({
         "type": "RestService",
           "alias": resource_name,
@@ -65,10 +71,6 @@ pub fn create_resource(
           }
     });
 
-    println!("Create RestService resource");
-    println!("Posting: {}", serde_json::to_string(&request).unwrap());
-    println!("To: {}", fasit_url());
-
     Ok(Client::new()
         .post(&format!("{}/api/v2/resources", fasit_url()))
         .header("Content-Type", "application/json")
@@ -80,6 +82,8 @@ pub fn create_resource(
 }
 
 pub fn create_application(fasit_user: &FasitUser, application: &str) -> reqwest::Result<u64> {
+    debug!("Creating application: {}", application);
+
     let request = json!({
         "name": application,
         "groupId": "no.nav.syfo",
@@ -98,6 +102,8 @@ pub fn create_application(fasit_user: &FasitUser, application: &str) -> reqwest:
 }
 
 pub fn get_application_by_name(application: &str) -> reqwest::Result<Option<u64>> {
+    debug!("Atempting to get application: {}", application);
+
     Client::new()
         .get(&format!("{}/api/v2/applications/{}", fasit_url(), application))
         .send()
@@ -114,6 +120,9 @@ pub fn create_application_instance(
     env: &str,
     resource_id: &u64,
 ) -> reqwest::Result<reqwest::Response> {
+    debug!("Creating application instance for application: {} with exposed resource: {} in {}",
+           application, resource_id, env);
+
     let request = json!({
         "application": application,
         "version": "1.0.0",
@@ -123,10 +132,6 @@ pub fn create_application_instance(
             "id": resource_id
         }]
     });
-
-    println!("Create application");
-    println!("Posting: {}", serde_json::to_string(&request).unwrap());
-    println!("To: {}", fasit_url());
 
     Client::new()
         .post(&format!("{}/api/v2/applicationinstances", fasit_url()))
