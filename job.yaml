@@ -6,6 +6,10 @@ metadata:
 spec:
   template:
     spec:
+      metadata:
+        name: restgw-iac
+        labels:
+          team: {{team}}
       containers:
       - name: restgw-iac
         image: docker.pkg.github.com/{{version}}
