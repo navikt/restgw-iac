@@ -23,7 +23,7 @@ spec:
               name: vault-secrets
           env:
             - name: VAULT_PATH
-              env: /var/run/secrets/nais.io/vault
+              value: /var/run/secrets/nais.io/vault
       initContainers:
         - name: vks
           image: navikt/vks:29
