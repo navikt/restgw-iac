@@ -12,10 +12,10 @@ spec:
         command: ["restgw-iac"]
         resources:
           requests:
-            memory: 8Mi
+            memory: 64Mi
             cpu: 5m
           limits:
-            memory: 8Mi
+            memory: 64Mi
             cpu: 5m
         env:
           - name: VAULT_PATH
