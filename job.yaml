@@ -34,20 +34,10 @@ spec:
             limits:
               memory: "128Mi"
               cpu: "100m"
-        volumeMounts:
-          - mountPath: /var/run/secrets/nais.io/vault
-            name: vault-secrets
-        serviceAccount: podcreator
-        serviceAccountName: podcreator
-        volumes:
-          - configMap:
-              defaultMode: 420
-              name: ca-bundle
-            name: ca-bundle
-          - emptyDir:
-              medium: Memory
-            name: vault-secrets
-        env:
+          volumeMounts:
+            - mountPath: /var/run/secrets/nais.io/vault
+              name: vault-secrets
+          env:
           - name: VKS_VAULT_ADDR
             value: https://vault.adeo.no
           - name: VKS_AUTH_PATH
@@ -58,5 +48,14 @@ spec:
             value: syfosoknadjob
           - name: VKS_SECRET_DEST_PATH
             value: /var/run/secrets/nais.io/vault
+      serviceAccount: podcreator
+      serviceAccountName: podcreator
+      volumes:
+        - configMap:
+          defaultMode: 420
+          name: ca-bundle
+        - emptyDir:
+          medium: Memory
+          name: vault-secrets
       restartPolicy: Never
   backoffLimit: 4
