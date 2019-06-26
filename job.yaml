@@ -5,10 +5,6 @@ metadata:
   namespace: syfocron
 spec:
   template:
-    metadata:
-      name: restgw-iac
-      labels:
-        team: {{team}}
     spec:
       containers:
       - name: restgw-iac
