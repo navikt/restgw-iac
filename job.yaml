@@ -5,11 +5,11 @@ metadata:
   namespace: syfocron
 spec:
   template:
+    metadata:
+      name: restgw-iac
+      labels:
+        team: {{team}}
     spec:
-      metadata:
-        name: restgw-iac
-        labels:
-          team: {{team}}
       containers:
       - name: restgw-iac
         image: docker.pkg.github.com/{{version}}
