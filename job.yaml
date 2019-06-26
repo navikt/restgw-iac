@@ -8,7 +8,8 @@ spec:
     spec:
       containers:
       - name: restgw-iac
-        image: docker.pkg.github.com/{{version}}
+        #image: docker.pkg.github.com/{{version}}
+        image: {{version}}
         command: ["restgw-iac"]
         resources:
           requests:
