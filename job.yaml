@@ -43,9 +43,9 @@ spec:
           - name: VKS_AUTH_PATH
             value: /kubernetes/preprod/fss
           - name: VKS_KV_PATH
-            value: /kv/preprod/fss/syfosoknadjob/syfocron
+            value: /kv/preprod/fss/restgw-iac/syfocron
           - name: VKS_VAULT_ROLE
-            value: syfosoknadjob
+            value: restgw-iac
           - name: VKS_SECRET_DEST_PATH
             value: /var/run/secrets/nais.io/vault
       serviceAccount: podcreator
