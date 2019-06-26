@@ -3,8 +3,6 @@ kind: Job
 metadata:
   name: restgw-iac
   namespace: syfocron
-  labels:
-    team: {{team}}
 spec:
   template:
     spec:
