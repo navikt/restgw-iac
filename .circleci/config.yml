@@ -33,7 +33,8 @@ jobs:
           path: target/x86_64-unknown-linux-musl/release/restgw-iac
       - run:
           name: Build docker image
-          command: docker build -t docker.pkg.github.com/$DOCKER_TAG .
+          #command: docker build -t docker.pkg.github.com/$DOCKER_TAG .
+          command: docker build -t $DOCKER_TAG .
       - run:
           name: Docker push
           command: |
