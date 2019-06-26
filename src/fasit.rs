@@ -30,7 +30,7 @@ fn fasit_url() -> &'static str {
 
 fn get_env_class(env: &str) -> &str {
     match env {
-        p => "p",
+        "p" => "p",
         _ => "q",
     }
 }
