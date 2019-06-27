@@ -12,7 +12,7 @@ fn api_management_url() -> &'static str {
 }
 
 #[cfg(not(test))]
-fn eier_group() -> &'static str { "rart " }
+fn eier_group() -> &'static str { "Group_05b6c0d2-b6db-4440-96b4-4de66c09b3c6" }
 
 #[cfg(test)]
 fn eier_group() -> &'static str {
