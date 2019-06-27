@@ -98,20 +98,35 @@ fn connect_consumer_and_producer(
         fasit_user,
         application_name,
         env,
-    ).expect("Failed to register exposed application");
+    )
+        .map(|mut result|
+            info!("Register resource call with status: {}, and body: {:?}",
+                  result.status(),
+                  result.json::<serde_json::Value>()))
+        .expect("Failed to register exposed application");
 
     api_management::register_application_consumer(
         fasit_user,
         application_name,
         &application_resource_name,
         consumer_name,
-    ).expect("Failed to register application consumer");
+    )
+        .map(|mut result|
+            info!("Register application consumer call with status: {}, and body: {:?}",
+                  result.status(),
+                  result.json::<serde_json::Value>()))
+        .expect("Failed to register application consumer");
 
     api_management::register_application_consumer_connection(
         fasit_user,
         application_name,
         env,
-    ).expect("Failed to register application consumer connection");
+    )
+        .map(|mut result|
+            info!("Register application consume connection call with status: {}, and body: {:?}",
+                  result.status(),
+                  result.json::<serde_json::Value>()))
+        .expect("Failed to register application consumer connection");
 
     info!("Application: {} and consumer: {} connected in {}", application_name, consumer_name, env)
 }

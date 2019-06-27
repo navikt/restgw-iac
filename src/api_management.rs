@@ -24,7 +24,7 @@ pub fn register_exposed_application(
     application: &String,
     env: &str
 ) -> reqwest::Result<reqwest::Response> {
-    debug!("Register {} as exposed application in {}", application, env);
+    info!("Register {} as exposed application in {}", application, env);
 
     Client::new()
         .put(&format!("{}/v1/katalog/applikasjoner/{}", api_management_url(), application))
@@ -39,7 +39,7 @@ pub fn register_application_consumer(
     resource: &String,
     consumer: &String
 ) -> reqwest::Result<reqwest::Response> {
-    debug!("Register {} as consumer of {}", application, resource);
+    info!("Register {} as consumer of {}", application, resource);
 
     Client::new()
         .put(&format!("{}/v1/katalog/applikasjoner/{}/{}/{}", api_management_url(), application, resource, consumer))
@@ -54,7 +54,7 @@ pub fn register_application_consumer_connection(
     application: &String,
     env: &str
 ) -> reqwest::Result<reqwest::Response> {
-    debug!("Register {} in rest gateway in {}", application, env);
+    info!("Register {} in rest gateway in {}", application, env);
 
     let request = json!({
         "gatewayEnv": env,

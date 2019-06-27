@@ -38,7 +38,7 @@ fn get_env_class(env: &str) -> &str {
 }
 
 pub fn get_resource_by_name(resource_name: &String, env: &str) -> reqwest::Result<Option<u64>> {
-    debug!("Atempting to get resource with name: {}, in {}", resource_name, env);
+    info!("Atempting to get resource with name: {}, in {}", resource_name, env);
 
     Ok(Client::new()
         .get(&format!("{}/api/v2/resources", fasit_url()))
@@ -56,7 +56,7 @@ pub fn create_resource(
     resource_name: &String,
     url: &String,
     env: &str) -> reqwest::Result<u64> {
-    debug!("Creating resource: {} in {}", resource_name, env);
+    info!("Creating resource: {} in {}", resource_name, env);
 
     let request = json!({
         "type": "RestService",
@@ -82,7 +82,7 @@ pub fn create_resource(
 }
 
 pub fn create_application(fasit_user: &FasitUser, application: &str) -> reqwest::Result<u64> {
-    debug!("Creating application: {}", application);
+    info!("Creating application: {}", application);
 
     let request = json!({
         "name": application,
@@ -102,7 +102,7 @@ pub fn create_application(fasit_user: &FasitUser, application: &str) -> reqwest:
 }
 
 pub fn get_application_by_name(application: &str) -> reqwest::Result<Option<u64>> {
-    debug!("Atempting to get application: {}", application);
+    info!("Atempting to get application: {}", application);
 
     Client::new()
         .get(&format!("{}/api/v2/applications/{}", fasit_url(), application))
@@ -120,7 +120,7 @@ pub fn create_application_instance(
     env: &str,
     resource_id: &u64,
 ) -> reqwest::Result<reqwest::Response> {
-    debug!("Creating application instance for application: {} with exposed resource: {} in {}",
+    info!("Creating application instance for application: {} with exposed resource: {} in {}",
            application, resource_id, env);
 
     let request = json!({
