@@ -102,7 +102,7 @@ fn connect_consumer_and_producer(
         .map(|mut result|
             info!("Register resource call with status: {}, and body: {:?}",
                   result.status(),
-                  result.json::<serde_json::Value>()))
+                  result.text()))
         .expect("Failed to register exposed application");
 
     api_management::register_application_consumer(
@@ -114,7 +114,7 @@ fn connect_consumer_and_producer(
         .map(|mut result|
             info!("Register application consumer call with status: {}, and body: {:?}",
                   result.status(),
-                  result.json::<serde_json::Value>()))
+                  result.text()))
         .expect("Failed to register application consumer");
 
     api_management::register_application_consumer_connection(
@@ -125,7 +125,7 @@ fn connect_consumer_and_producer(
         .map(|mut result|
             info!("Register application consume connection call with status: {}, and body: {:?}",
                   result.status(),
-                  result.json::<serde_json::Value>()))
+                  result.text()))
         .expect("Failed to register application consumer connection");
 
     info!("Application: {} and consumer: {} connected in {}", application_name, consumer_name, env)
