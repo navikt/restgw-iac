@@ -1,3 +1,4 @@
+extern crate env_logger;
 #[macro_use]
 extern crate log;
 extern crate reqwest;
@@ -55,6 +56,8 @@ impl Zone {
 fn fasit_user() -> FasitUser { FasitUser { username: "usr".to_owned(), password: "pass".to_owned() } }
 
 fn main() {
+    env_logger::init();
+
     let credentials_path: PathBuf = [env::var("VAULT_PATH")
         .unwrap_or(".".to_owned()), "credentials.json".to_owned()].iter().collect();
     info!("Secrets path: {:?}", &credentials_path);
