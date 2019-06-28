@@ -4,7 +4,7 @@ use serde_json;
 use crate::FasitUser;
 
 #[cfg(not(test))]
-fn api_management_url() -> &'static str { "http://api-management.default/rest" }
+fn api_management_url() -> &'static str { "https://api-management.nais.adeo.no/rest" }
 
 #[cfg(test)]
 fn api_management_url() -> &'static str {
