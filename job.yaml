@@ -41,9 +41,9 @@ spec:
           - name: VKS_VAULT_ADDR
             value: https://vault.adeo.no
           - name: VKS_AUTH_PATH
-            value: /kubernetes/preprod/fss
+            value: /kubernetes/prod/fss
           - name: VKS_KV_PATH
-            value: /kv/preprod/fss/restgw-iac/syfocron
+            value: /kv/prod/fss/restgw-iac/syfocron
           - name: VKS_VAULT_ROLE
             value: restgw-iac
           - name: VKS_SECRET_DEST_PATH
