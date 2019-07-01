@@ -71,7 +71,7 @@ fn main() {
     ).expect("Unable to parse configuration as json");
 
     (&configuration).into_iter()
-        .flat_map(|pair| vec![("p", pair), ("q1", pair)])
+        .flat_map(|pair| vec![("q1", pair), ("p", pair)])
         .for_each(|(env, pair)| {
             connect_consumer_and_producer(
                 &fasit_user,
@@ -123,7 +123,7 @@ fn connect_consumer_and_producer(
         env,
     )
         .map(|mut result|
-            info!("Register application consume connection call with status: {}, and body: {:?}",
+            info!("Register application consumer connection call with status: {}, and body: {:?}",
                   result.status(),
                   result.text()))
         .expect("Failed to register application consumer connection");

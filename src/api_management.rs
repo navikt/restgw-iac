@@ -63,7 +63,7 @@ pub fn register_application_consumer_connection(
     });
 
     Client::new()
-        .post(&format!("{}/v2/deploy/{}", api_management_url(), application))
+        .post(&format!("{}/v2/register/deploy/{}", api_management_url(), application))
         .header("Content-Type", "application/json")
         .json(&request)
         .basic_auth(&fasit_user.username, Some(fasit_user.password.clone()))
