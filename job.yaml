@@ -21,6 +21,9 @@ spec:
           volumeMounts:
             - mountPath: /var/run/secrets/nais.io/vault
               name: vault-secrets
+            - mountPath: /etc/ssl/certs/ca-certificates.crt
+              name: ca-bundle
+              subPath: ca-bundle.pem
           env:
             - name: VAULT_PATH
               value: /var/run/secrets/nais.io/vault
@@ -58,5 +61,4 @@ spec:
           medium: Memory
           name: vault-secrets
       restartPolicy: Never
-      ttlSecondsAfterFinished: 150
   backoffLimit: 4
