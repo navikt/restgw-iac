@@ -2,5 +2,9 @@
   {
     "application_name": "syfotekster-v2",
     "consumer_name": "syfoteksterproxy"
+  },
+  {
+    "application_name": "syfosmregister",
+    "consumer_name": "syfosmregisterproxy"
   }
 ]
