@@ -77,7 +77,7 @@ fn main() {
     ).expect("Unable to parse configuration as json");
 
     (&configuration).into_iter()
-        .flat_map(|pair| vec![("q1", pair), ("p", pair)])
+        .flat_map(|pair| vec![("q1", pair)])
         .for_each(|(env, pair)| {
             connect_consumer_and_producer(
                 &fasit_user,
