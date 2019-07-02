@@ -7,7 +7,8 @@ use reqwest::header::LOCATION;
 use reqwest::Response;
 use serde_json;
 
-use crate::FasitUser;
+use super::FasitUser;
+use super::http_helpers::RestError;
 
 #[derive(Deserialize, Clone, Debug)]
 pub struct FasitResource {
@@ -37,13 +38,19 @@ fn get_env_class(env: &str) -> &str {
     }
 }
 
-pub fn get_resource_by_name(resource_name: &String, env: &str) -> reqwest::Result<Option<u64>> {
+impl From<reqwest::Error> for RestError {
+    fn from(err: reqwest::Error) -> RestError {
+        RestError::ReqwestError(err)
+    }
+}
+
+pub fn get_resource_by_name(resource_name: &String, env: &str) -> Result<Option<u64>, RestError> {
     info!("Atempting to get resource with name: {}, in {}", resource_name, env);
 
-    Ok(Client::new()
+    Ok(http_ok_try!(Client::new()
         .get(&format!("{}/api/v2/resources", fasit_url()))
         .query(&[("alias", resource_name), ("environment", &env.to_owned())])
-        .send()?
+        .send())
         .json::<Vec<FasitResource>>()?
         .into_iter()
         .find(|resource| &resource.alias == resource_name)
@@ -55,7 +62,7 @@ pub fn create_resource(
     fasit_user: &FasitUser,
     resource_name: &String,
     url: &String,
-    env: &str) -> reqwest::Result<u64> {
+    env: &str) -> Result<u64, RestError> {
     info!("Creating resource: {} in {}", resource_name, env);
 
     let request = json!({
@@ -71,17 +78,17 @@ pub fn create_resource(
           }
     });
 
-    Ok(Client::new()
+    Ok(http_ok_try!(Client::new()
         .post(&format!("{}/api/v2/resources", fasit_url()))
         .header("Content-Type", "application/json")
         .json(&request)
         .basic_auth(&fasit_user.username, Some(fasit_user.password.clone()))
-        .send()?
+        .send())
         .headers().get(LOCATION).unwrap()
         .to_str().unwrap().split("/").last().unwrap().to_owned().parse::<u64>().unwrap())
 }
 
-pub fn create_application(fasit_user: &FasitUser, application: &str) -> reqwest::Result<u64> {
+pub fn create_application(fasit_user: &FasitUser, application: &str) -> Result<u64, RestError> {
     info!("Creating application: {}", application);
 
     let request = json!({
@@ -91,27 +98,23 @@ pub fn create_application(fasit_user: &FasitUser, application: &str) -> reqwest:
         "portOffset": 0
     });
 
-    Ok(Client::new()
+    Ok(http_ok_try!(Client::new()
         .post(&format!("{}/api/v2/applications", fasit_url()))
         .header("Content-Type", "application/json")
         .json(&request)
         .basic_auth(&fasit_user.username, Some(fasit_user.password.clone()))
-        .send()?
+        .send())
         .headers().get(LOCATION).unwrap()
         .to_str().unwrap().split("/").last().unwrap().to_owned().parse::<u64>().unwrap())
 }
 
-pub fn get_application_by_name(application: &str) -> reqwest::Result<Option<u64>> {
+pub fn get_application_by_name(application: &str) -> Result<u64, RestError> {
     info!("Atempting to get application: {}", application);
 
-    Client::new()
+    Ok(http_ok_try!(Client::new()
         .get(&format!("{}/api/v2/applications/{}", fasit_url(), application))
-        .send()
-        .map(|mut response| Ok(Some(response.json::<FasitApplication>().unwrap().id)))
-        .unwrap_or_else(|err| match err.status().map(|status| status.as_u16()) {
-            Some(404) => Ok(None),
-            _ => Err(err),
-        })
+        .send())
+        .json::<FasitApplication>().unwrap().id)
 }
 
 pub fn create_application_instance(
@@ -119,7 +122,7 @@ pub fn create_application_instance(
     application: &str,
     env: &str,
     resource_id: &u64,
-) -> reqwest::Result<reqwest::Response> {
+) -> Result<reqwest::Response, RestError> {
     info!("Creating application instance for application: {} with exposed resource: {} in {}",
            application, resource_id, env);
 
@@ -133,10 +136,10 @@ pub fn create_application_instance(
         }]
     });
 
-    Client::new()
+    Ok(http_ok_try!(Client::new()
         .post(&format!("{}/api/v2/applicationinstances", fasit_url()))
         .header("Content-Type", "application/json")
         .json(&request)
         .basic_auth(&fasit_user.username, Some(fasit_user.password.clone()))
-        .send()
+        .send()))
 }

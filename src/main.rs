@@ -8,13 +8,19 @@ extern crate serde_derive;
 #[macro_use]
 extern crate serde_json;
 
+#[macro_use]
+mod http_helpers;
+mod fasit;
+mod api_management;
+
 use std::env;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
 
-mod fasit;
-mod api_management;
+use reqwest::StatusCode;
+
+use http_helpers::RestError;
 
 #[derive(Deserialize, Clone, Debug)]
 pub struct FasitUser {
@@ -159,9 +165,11 @@ fn get_or_create_resource(
             .expect("Failed to create resource in fasit"))
 }
 
-fn get_or_create_application(fasit_user: &FasitUser, appliaction: &String) -> u64 {
-    fasit::get_application_by_name(appliaction)
-        .expect("Failed to get application from fasit")
-        .unwrap_or_else(|| fasit::create_application(fasit_user, appliaction)
-            .expect("Failed to create application in fasit"))
+fn get_or_create_application(fasit_user: &FasitUser, application: &String) -> u64 {
+    match fasit::get_application_by_name(application) {
+        Err(RestError::NotOk(status)) if status == StatusCode::NOT_FOUND => {
+            fasit::create_application(fasit_user, application)
+        },
+        remaining => remaining,
+    }.expect("Failed to get or create application in fasit")
 }
