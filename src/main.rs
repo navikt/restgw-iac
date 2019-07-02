@@ -142,7 +142,7 @@ fn set_up_applicationinstance(
     application_name: &String,
     zone: &Zone,
     env: &str) -> String {
-    let resource_name = format!("{}RestService", application_name);
+    let resource_name = format!("{}Api", application_name);
     let url = zone.application_url_for(application_name, env);
 
     let resource_id = get_or_create_resource(&fasit_user, &resource_name, &url, env);
