@@ -41,7 +41,7 @@ enum Zone {
 
 impl Zone {
     fn application_url_for(&self, application_name: &String, env: &str) -> String {
-        format!("https://{}.{}", application_name, self.domain_name_for(env))
+        format!("https://{}.{}/api", application_name, self.domain_name_for(env))
     }
 
     fn domain_name_for(&self, env: &str) -> &'static str {
