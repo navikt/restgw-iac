@@ -8,11 +8,6 @@ extern crate serde_derive;
 #[macro_use]
 extern crate serde_json;
 
-#[macro_use]
-mod http_helpers;
-mod fasit;
-mod api_management;
-
 use std::env;
 use std::fs::File;
 use std::io::Read;
@@ -21,6 +16,11 @@ use std::path::PathBuf;
 use reqwest::StatusCode;
 
 use http_helpers::RestError;
+
+#[macro_use]
+mod http_helpers;
+mod fasit;
+mod api_management;
 
 #[derive(Deserialize, Clone, Debug)]
 pub struct FasitUser {
@@ -98,7 +98,7 @@ fn connect_consumer_and_producer(
     let application_resource_name =
         set_up_applicationinstance(fasit_user, application_name, &Zone::FSS, env);
 
-    set_up_applicationinstance(fasit_user, consumer_name, &Zone::SBS, env);
+    set_up_consumer_application_instance(fasit_user, consumer_name, env);
 
     api_management::register_exposed_application(
         fasit_user,
@@ -148,10 +148,19 @@ fn set_up_applicationinstance(
     let resource_id = get_or_create_resource(&fasit_user, &resource_name, &url, env);
     get_or_create_application(&fasit_user, application_name);
 
-    fasit::create_application_instance(fasit_user, application_name, env, &resource_id)
+    fasit::create_application_instance(fasit_user, application_name, env, vec![resource_id])
         .expect("Failed to create application instance");
 
     resource_name
+}
+
+fn set_up_consumer_application_instance(
+    fasit_user: &FasitUser,
+    consumer_name: &String,
+    env: &str) {
+    get_or_create_application(&fasit_user, consumer_name);
+    fasit::create_application_instance(fasit_user, consumer_name, env, vec![])
+        .expect("Failed to create application instance without resource");
 }
 
 fn get_or_create_resource(
@@ -159,7 +168,7 @@ fn get_or_create_resource(
     resource_name: &String,
     url: &String,
     env: &str) -> u64 {
-    fasit::get_resource_by_name(resource_name, env)
+    fasit::get_fss_resource_by_name(resource_name, env)
         .expect("Failed to get resource from fasit")
         .unwrap_or_else(|| fasit::create_resource(fasit_user, resource_name, url, env)
             .expect("Failed to create resource in fasit"))
@@ -169,7 +178,7 @@ fn get_or_create_application(fasit_user: &FasitUser, application: &String) -> u6
     match fasit::get_application_by_name(application) {
         Err(RestError::NotOk(status)) if status == StatusCode::NOT_FOUND => {
             fasit::create_application(fasit_user, application)
-        },
+        }
         remaining => remaining,
     }.expect("Failed to get or create application in fasit")
 }

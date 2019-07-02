@@ -44,12 +44,17 @@ impl From<reqwest::Error> for RestError {
     }
 }
 
-pub fn get_resource_by_name(resource_name: &String, env: &str) -> Result<Option<u64>, RestError> {
+pub fn get_fss_resource_by_name(resource_name: &String, env: &str) -> Result<Option<u64>, RestError> {
     info!("Atempting to get resource with name: {}, in {}", resource_name, env);
 
     Ok(http_ok_try!(Client::new()
         .get(&format!("{}/api/v2/resources", fasit_url()))
-        .query(&[("alias", resource_name), ("environment", &env.to_owned())])
+        .query(&[
+            ("alias", resource_name),
+            ("environment", &env.to_owned()),
+            ("zone", &"FSS".to_owned()),
+            ("type", &"RestService".to_owned())
+        ])
         .send())
         .json::<Vec<FasitResource>>()?
         .into_iter()
@@ -121,19 +126,19 @@ pub fn create_application_instance(
     fasit_user: &FasitUser,
     application: &str,
     env: &str,
-    resource_id: &u64,
+    resource_ids: Vec<u64>,
 ) -> Result<reqwest::Response, RestError> {
-    info!("Creating application instance for application: {} with exposed resource: {} in {}",
-           application, resource_id, env);
+    info!("Creating application instance for application: {} with exposed resource: {:?} in {}",
+          application, resource_ids, env);
+
+    let exposed_resources: Vec<_> = resource_ids.into_iter().map(|id| json!({ "id": id })).collect();
 
     let request = json!({
         "application": application,
         "version": "1.0.0",
         "environment": env,
         "clustername": "nais",
-        "exposedresources": [{
-            "id": resource_id
-        }]
+        "exposedresources": exposed_resources
     });
 
     Ok(http_ok_try!(Client::new()
