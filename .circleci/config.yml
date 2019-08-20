@@ -1,4 +1,6 @@
 version: 2.1
+orbs:
+  barkendeploy: navikt/barkendeploy@dev:master
 jobs:
   linux_build:
     docker:
@@ -6,15 +8,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      - run:
-          name: Generate version number and docker image tags
-          command: |
-            mkdir /tmp/workspace
-            export RELEASE_VERSION=$CIRCLE_SHA1-$CIRCLE_BUILD_NUM
-            echo "export RELEASE_VERSION=$RELEASE_VERSION" >> /tmp/workspace/properties.env
-            echo "export DOCKER_TAG=\"$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:$RELEASE_VERSION\"" >> /tmp/workspace/properties.env
-            # echo "export DOCKER_TAG=\"$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/$CIRCLE_PROJECT_REPONAME:$RELEASE_VERSION\"" >> /tmp/workspace/properties.env
-            cat /tmp/workspace/properties.env >> $BASH_ENV
+      - barkendeploy/init
       - run:
           name: Install required dependencies
           command: |
@@ -31,21 +25,8 @@ jobs:
           command: cargo build --release --target x86_64-unknown-linux-musl
       - store_artifacts:
           path: target/x86_64-unknown-linux-musl/release/restgw-iac
-      - run:
-          name: Build docker image
-          #command: docker build -t docker.pkg.github.com/$DOCKER_TAG .
-          command: docker build -t $DOCKER_TAG .
-      - run:
-          name: Docker push
-          command: |
-            # echo "$DEPLOYMENT_PASSWORD" | docker login -u "$DEPLOYMENT_USERNAME" --password-stdin docker.pkg.github.com
-            # docker push docker.pkg.github.com/$DOCKER_TAG
-            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-            docker push $DOCKER_TAG
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - properties.env
+      - barkendeploy/docker-build
+      - barkendeploy/docker-push
   deploy:
     docker:
       - image: "navikt/deployment-cli:44bb04ecc11c0e57ac539744411c70794dd31899"
@@ -64,12 +45,15 @@ workflows:
   build_and_release:
     jobs:
       - linux_build:
+          context: barkendeploy
           filters:
             tags:
               only: master
-      - deploy:
+      - barkendeploy/deploy-publish:
+          cluster: dev-fss
+          context: barkendeploy
           requires:
-            - linux_build
+            - build_jar
           filters:
             branches:
               only: master
