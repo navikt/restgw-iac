@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   linux_build:
     docker:
-      - image: "circleci/rust:1.35.0"
+      - image: "circleci/rust:1.36.0"
     steps:
       - checkout
       - setup_remote_docker
