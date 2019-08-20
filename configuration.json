@@ -6,5 +6,9 @@
   {
     "application_name": "syfosmregister",
     "consumer_name": "syfosmregisterproxy"
+  },
+  {
+    "application_name": "syfosmregister",
+    "consumer_name": "sykefravaer"
   }
 ]
