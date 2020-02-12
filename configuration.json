@@ -10,5 +10,9 @@
   {
     "application_name": "syfosmregister",
     "consumer_name": "sykefravaer"
+  },
+  {
+    "application_name": "sykmeldinger-backend",
+    "consumer_name": "sykefravaer"
   }
 ]
