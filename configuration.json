@@ -13,6 +13,6 @@
   },
   {
     "application_name": "sykmeldinger-backend",
-    "consumer_name": "sykefravaer"
+    "consumer_name": "sykmeldinger-backendproxy"
   }
 ]
